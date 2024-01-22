@@ -1,0 +1,66 @@
+service: aws-node-http-api-typescript-project
+frameworkVersion: '3'
+region: us-east-1
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-east-1:388474629203:table/TaskTable"
+
+functions:
+  hello:
+    handler: src/handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+  starwars-films-get:
+    handler: src/starwars.filmsList
+    events:
+      - httpApi:
+          path: /starwars-films
+          method: get
+  starwars-people-get:
+    handler: src/starwars.peopleList
+    events:
+      - httpApi:
+          path: /starwars-people
+          method: get
+  task-post:
+    handler: src/task.addTask
+    events:
+      - httpApi:
+          path: /task
+          method: post
+  task-get:
+    handler: src/task.getTasks
+    events:
+      - httpApi:
+          path: /task
+          method: get
+
+resources:
+  Resources:
+    TaskTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TaskTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+plugins:
+  - serverless-plugin-typescript
